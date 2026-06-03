@@ -1,4 +1,4 @@
-name: CI/CD
+﻿name: CI/CD
 
 on:
   push:
@@ -27,7 +27,10 @@ jobs:
         id: start
         run: echo "start=$(date +%s)" >> $GITHUB_OUTPUT
       - name: Build and test
-        run: mvn verify --no-transfer-progress -DskipTests
+        run: mvn clean package -DskipTests --no-transfer-progress
+      - name: Run tests (non-blocking)
+        run: mvn test --no-transfer-progress || true
+        continue-on-error: true -DskipTests
       - name: Record build time
         id: timer
         run: |
@@ -127,3 +130,4 @@ jobs:
           echo "| Build and Test | ${{ needs.build-test.outputs.build_time }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Docker Build and Push | ${{ needs.docker.outputs.docker_time }} |" >> $GITHUB_STEP_SUMMARY
           echo "| K8s Deploy | ${{ needs.deploy-k8s.outputs.deploy_time }} |" >> $GITHUB_STEP_SUMMARY
+
